@@ -9,7 +9,7 @@ from peewee import (
     FloatField, TextField, IntegrityError
 )
 from playhouse.shortcuts import model_to_dict
-
+import numpy as np
 
 
 
@@ -82,9 +82,20 @@ def predict():
     observation = obs_dict['observation']
     # now do what we already learned in the notebooks about how to transform
     # a single observation into a dataframe that will work with a pipeline
-    obs = pd.DataFrame([observation], columns=columns).astype(dtypes)
+    
     # now get ourselves an actual prediction of the positive class
-    proba = pipeline.predict_proba(obs)[0, 1]
+    try:
+    	obs = pd.DataFrame([observation], columns=columns)
+    	obs.age_in_years = obs.age_in_years.fillna(46.713470575072726)
+    	obs = obs.astype(dtypes)
+    	proba = pipeline.predict_proba(obs)[0, 1]
+    except Exception as e:
+        response = {}
+        response['error'] = str(e)
+        print(response['error'])
+        return jsonify(response)
+    
+    
     response = {'proba': float(proba)}
     p = Prediction(
         observation_id=_id,

@@ -7,3 +7,4 @@ peewee
 psycopg2
 category-encoders==1.2.6
 xgboost
+numpy
